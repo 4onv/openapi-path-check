@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Synthetic inherited parameters",
+    "method": "GET",
+    "template": "/workspaces/{workspace}/documents/{document}",
+    "values": {
+      "workspace": "north team",
+      "document": "a/b?x#y"
+    },
+    "expected": "/workspaces/north%20team/documents/a%2Fb%3Fx%23y"
+  },
+  {
+    "name": "Synthetic operation override",
+    "method": "PATCH",
+    "template": "/workspaces/{workspace}/documents/{document}",
+    "values": {
+      "workspace": "north team",
+      "document": "a/b?x#y"
+    },
+    "expected": "/workspaces/north%20team/documents/.a%2Fb%3Fx%23y"
+  },
+  {
+    "name": "Synthetic exploded array",
+    "method": "GET",
+    "template": "/reports/{tags}",
+    "values": {
+      "tags": [
+        "east/west",
+        "Q1;Q2"
+      ]
+    },
+    "expected": "/reports/;tags=east%2Fwest;tags=Q1%3BQ2"
+  }
+]

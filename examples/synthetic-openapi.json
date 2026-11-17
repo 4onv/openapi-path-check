@@ -1,0 +1,91 @@
+{
+  "openapi": "3.1.2",
+  "info": {
+    "title": "Synthetic API path check example",
+    "version": "1"
+  },
+  "paths": {
+    "/workspaces/{workspace}/documents/{document}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/workspace"
+        },
+        {
+          "$ref": "#/components/parameters/document"
+        }
+      ],
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/documentLabel"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/reports/{tags}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "tags",
+            "in": "path",
+            "required": true,
+            "style": "matrix",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "workspace": {
+        "name": "workspace",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "document": {
+        "name": "document",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "documentLabel": {
+        "name": "document",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "style": "label"
+      }
+    }
+  }
+}
