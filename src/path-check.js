@@ -171,6 +171,43 @@ export function auditOpenApi(spec) {
   return { openapi: spec.openapi, operations, diagnostics };
 }
 
+/** Compare effective serialization settings after inheritance and ref resolution. */
+export function diffPathContracts(beforeSpec, afterSpec) {
+  const before = auditOpenApi(beforeSpec);
+  const after = auditOpenApi(afterSpec);
+  const diagnostics = { before: before.diagnostics, after: after.diagnostics };
+  if (diagnostics.before.length || diagnostics.after.length) {
+    return { status: 'inconclusive', diagnostics, added: [], removed: [], changed: [] };
+  }
+
+  const index = audit => new Map(audit.operations.map(({ method, template, parameters }) => [
+    method + ' ' + template,
+    { method, template, parameters: parameters.map(({ name, style, explode }) => ({ name, style, explode })) },
+  ]));
+  const previous = index(before);
+  const current = index(after);
+  const added = [];
+  const removed = [];
+  const changed = [];
+  for (const [key, operation] of previous) {
+    const newer = current.get(key);
+    if (!newer) {
+      removed.push(operation);
+      continue;
+    }
+    const changes = operation.parameters.flatMap((parameter, index) => {
+      const replacement = newer.parameters[index];
+      return parameter.style !== replacement.style || parameter.explode !== replacement.explode
+        ? [{ name: parameter.name, before: parameter, after: replacement }]
+        : [];
+    });
+    if (changes.length) changed.push({ method: operation.method, template: operation.template, changes });
+  }
+  for (const [key, operation] of current) if (!previous.has(key)) added.push(operation);
+  const status = added.length || removed.length || changed.length ? 'changed' : 'unchanged';
+  return { status, diagnostics, added, removed, changed };
+}
+
 function encode(value) {
   if (!['string', 'boolean', 'number'].includes(typeof value) ||
       (typeof value === 'number' && !Number.isFinite(value))) {

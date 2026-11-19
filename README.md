@@ -7,7 +7,7 @@ See which path parameters an OpenAPI operation inherits, preview the exact encod
 Download the archive, then run the included synthetic example with Node.js 22 or later. [GitHub release](https://github.com/4onv/openapi-path-check/releases/latest)
 
 ```sh
-npm install --global --offline ./4onv-openapi-path-check-0.1.0.tgz
+npm install --global --offline ./4onv-openapi-path-check-0.2.0.tgz
 openapi-path-check demo
 ```
 
@@ -47,6 +47,16 @@ The fixture file contains an array of named cases. This synthetic case checks th
 ```
 
 Use `audit` to check the supported declarations and `check` to pin behavior for important inputs. Both exit 1 on findings. Invalid input or a render error exits 2. Successful commands exit 0. Fixture output may include values encoded in paths, so use synthetic values in shared CI logs.
+
+## Compare revisions
+
+```sh
+openapi-path-check diff before.json after.json --json --fail-on-change
+```
+
+Compare added and removed operations and changes to effective path parameter `style` or `explode` after resolving inheritance and same-document references. Moving an equivalent declaration between an operation and its Path Item leaves the comparison unchanged. Operation identity uses the exact HTTP method and path template. A renamed template appears as a removal and an addition. [OpenAPI 3.1 parameter inheritance](https://spec.openapis.org/oas/v3.1.1.html#operation-object)
+
+With `--fail-on-change`, differences exit 1. Path diagnostics or invalid input exit 2. Otherwise the command exits 0. The comparison covers path serialization settings. Use `check` with concrete values and expected request paths to test wire behavior. Schema constraints, query parameters and response contracts are outside the diff scope.
 
 ## Scope
 

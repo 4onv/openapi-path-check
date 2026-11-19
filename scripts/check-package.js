@@ -25,6 +25,8 @@ try {
   const demo = JSON.parse(node([...exec, 'demo', '--json']));
   assert.equal(demo.synthetic, true);
   assert.equal(demo.checks.passed, 3);
+  const spec = join(directory, 'node_modules', '@4onv', 'openapi-path-check', 'examples', 'synthetic-openapi.json');
+  assert.equal(JSON.parse(node([...exec, 'diff', spec, spec, '--json', '--fail-on-change'])).status, 'unchanged');
   node(['--input-type=module', '--eval',
     "import { auditOpenApi, renderPath, checkCases } from '@4onv/openapi-path-check';" +
     "if (auditOpenApi({openapi:'3.1.2'}).operations.length || !renderPath || !checkCases) process.exit(1);"]);

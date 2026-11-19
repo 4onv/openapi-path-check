@@ -1,6 +1,6 @@
 {
   "name": "@4onv/openapi-path-check",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Explain OpenAPI path parameter inheritance and test exact encoded request paths.",
   "type": "module",
   "bin": {

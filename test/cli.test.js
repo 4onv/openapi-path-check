@@ -26,6 +26,34 @@ async function withFile(content, callback) {
   }
 }
 
+test('diff separates effective style changes and operation changes from invalid input', async () => {
+  const original = JSON.parse(await readFile(spec, 'utf8'));
+  const changed = structuredClone(original);
+  const item = changed.paths[template];
+  item.get.parameters = [{ name: 'document', in: 'path', required: true, schema: { type: 'string' },
+    style: 'matrix', explode: true }];
+  item.post = { responses: {} };
+  delete item.patch;
+  await withFile(JSON.stringify(changed), file => {
+    const result = run('diff', spec, file, '--json', '--fail-on-change');
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const diff = JSON.parse(result.stdout);
+    assert.equal(diff.changed[0].changes[0].after.style, 'matrix');
+    assert.ok(diff.added.some(row => row.method === 'POST'));
+    assert.ok(diff.removed.some(row => row.method === 'PATCH'));
+    assert.equal(run('diff', spec, file).status, 0);
+    assert.equal(run('diff', spec, spec, '--fail-on-change').status, 0);
+  });
+  item.get.parameters[0].required = false;
+  await withFile(JSON.stringify(changed), file => {
+    const invalid = run('diff', spec, file, '--json', '--fail-on-change');
+    assert.equal(invalid.status, 2);
+    const diff = JSON.parse(invalid.stdout);
+    assert.equal(diff.status, 'inconclusive');
+    assert.deepEqual(diff.removed, []);
+  });
+});
+
 test('CLI demo labels synthetic data and passes its bundled fixtures', () => {
   const human = run('demo');
   assert.equal(human.status, 0, human.stderr);
